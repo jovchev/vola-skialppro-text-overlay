@@ -1,13 +1,46 @@
 var net = require('net');
+const sqlite3 = require('sqlite3').verbose();
+
+const fileName = "c:/Projects/ski/skier.txt"
+const dbLocation = 'C:/SkiAlpPro/Events/Event001.scdb'
 
 var skiers = {}
-skiers["100"] = {Name:"First 100"}
-skiers["101"] = {Name:"First 101"}
+
+let db = new sqlite3.Database(dbLocation, sqlite3.OPEN_READONLY, (err) => {
+    if (err) {
+      console.error(err.message);
+    }
+    console.log('Connected to the chinook database.');
+  });
+
+  db.serialize(() => {
+    db.each(`SELECT C_NUM as bib,
+                    C_FIRST_NAME as first_name,
+                    C_LAST_NAME as last_name
+             FROM TCOMPETITORS`, (err, row) => {
+      if (err) {
+        console.error(err.message);
+      }
+      skiers[row.bib] = {Name: row.first_name + ' ' + row.last_name}
+      
+      console.log(row.bib + "\t" + row.first_name + "\t" + row.last_name);
+    });
+  });
+  
+  db.close((err) => {
+    if (err) {
+      console.error(err.message);
+    }
+    console.log('Close the database connection.');
+  });
+
+//exit();
+
 
 
 var client = new net.Socket();
 const fs = require('fs');
-const fileName = "c:/Projects/ski/skier.txt"
+
 client.connect(5409, '127.0.0.1', function() {
 	console.log('Connected');
 	client.write('Hello, server! Love, Client.');
