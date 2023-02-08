@@ -16,12 +16,14 @@ let db = new sqlite3.Database(dbLocation, sqlite3.OPEN_READONLY, (err) => {
   db.serialize(() => {
     db.each(`SELECT C_NUM as bib,
                     C_FIRST_NAME as first_name,
-                    C_LAST_NAME as last_name
+                    C_LAST_NAME as last_name,
+                    C_YEAR as year,
+                    C_CATEGORY as category
              FROM TCOMPETITORS`, (err, row) => {
       if (err) {
         console.error(err.message);
       }
-      skiers[row.bib] = {Name: row.first_name + ' ' + row.last_name}
+      skiers[row.bib] = {Name: row.first_name + ' ' + row.last_name, Year: row.year, Category:row.category}
       
       console.log(row.bib + "\t" + row.first_name + "\t" + row.last_name);
     });
@@ -42,16 +44,11 @@ var client = new net.Socket();
 const fs = require('fs');
 
 client.connect(5409, '127.0.0.1', function() {
-	console.log('Connected');
-	client.write('Hello, server! Love, Client.');
+	console.log('Connected to timing machine');
 });
 
 client.on('data', function(data) {
-    /// 720 60000000
-    /// 36  60000000
-    /// 1s.11 =     1110000
-    /// 2s.11 =     2110000
-    /// 1m2s.11 =  62110000
+
     var str = data.toString()
     if (str.startsWith("NR;"))
     {
@@ -92,15 +89,3 @@ function SkiToTime(duration)
     var seconds = duration.slice(0, duration.length-6)
     return seconds + "." + ms
 }
-
-function secToTime(duration) {
-    var seconds = Math.floor((duration) % 60),
-      minutes = Math.floor((duration / 60) % 60),
-      hours = Math.floor((duration /(60 * 60)) % 24);
-  
-    hours = (hours < 10) ? "0" + hours : hours;
-    minutes = (minutes < 10) ? "0" + minutes : minutes;
-    seconds = (seconds < 10) ? "0" + seconds : seconds;
-  
-    return hours + ":" + minutes + ":" + seconds;
-  }
