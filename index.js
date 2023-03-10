@@ -1,8 +1,12 @@
 var net = require('net');
 const sqlite3 = require('sqlite3').verbose();
 
-const fileName = "c:/Projects/ski/skier.txt"
-const dbLocation = 'C:/SkiAlpPro/Events/Event001.scdb'
+var arguments = process.argv;
+const dbLocation = process.env.npm_config_dbLocation || 'C:/SkiAlpPro/Events/Event001.scdb'
+const fileName = process.env.npm_config_overlayFile || "c:/Projects/ski/skier.txt"
+
+console.log('db:' + dbLocation)
+console.log('overlay file:' + fileName)
 
 var skiers = {}
 
@@ -42,6 +46,7 @@ let db = new sqlite3.Database(dbLocation, sqlite3.OPEN_READONLY, (err) => {
 
 var client = new net.Socket();
 const fs = require('fs');
+const { exit } = require('process');
 
 client.connect(5409, '127.0.0.1', function() {
 	console.log('Connected to timing machine');
